@@ -1,0 +1,440 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        310
+      ],
+      "id": "79d08ce7-bc17-4a1a-a396-c1fc98c355b7",
+      "name": "When chat message received",
+      "webhookId": "b303a8d2-b7f9-4fff-be2c-769a05539857"
+    },
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        328,
+        530
+      ],
+      "id": "8ead14f9-6fb5-4a58-b0e1-688834e5bd17",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "JYm61qxGDVBjOtEa",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        704,
+        680
+      ],
+      "id": "efdc0cd9-6331-45e2-9280-376bf52035c6",
+      "name": "Azure OpenAI Chat Model1",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "JYm61qxGDVBjOtEa",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        540
+      ],
+      "id": "0e67aa47-bdc5-47aa-8ad7-423ef41a5ee7",
+      "name": "Azure OpenAI Chat Model3",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "JYm61qxGDVBjOtEa",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Take the input. Separately Mention the Individual tasks that certain individuals have to do(nothing else)\n\nInput : {{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        616,
+        460
+      ],
+      "id": "a201e302-203b-423d-9dab-de41de650a2e",
+      "name": "Task Maker",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Take the user input(i.e. the transcript) and summarize it in the format of\nRecap of (Name of the meeting or simply date)\n-Topics(Whatever seems like a topic statement)\n-Action items(ex. Adam will be doing \"this\" till \"time\")\n-Key Questions\n-Topics for the next meetings\n(All of these are heading, so stuff will come under them)\n\nUser input = {{ $json.chatInput }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        240,
+        310
+      ],
+      "id": "b5f42aa1-02f7-4192-9554-ffaf5f0569c2",
+      "name": "Summarizer"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Retrieve only The latest file(.txt) from the \"Hackathon - Transcripts & Recordings\" folder from drive ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        320
+      ],
+      "id": "12fe5fff-9921-487e-83dd-93707d918f28",
+      "name": "Fetcher"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 30,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "yashj01122@gmail.com",
+          "mode": "id"
+        },
+        "triggerOn": "eventEnded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        320
+      ],
+      "id": "b2beb1cd-108c-4b9c-a0cc-d25f95e382bb",
+      "name": "Google Calendar Trigger",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "WIR7LVte2sq2a5kb",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "yashj01122@gmail.com",
+        "subject": "Recap of the latest meeting",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        694,
+        160
+      ],
+      "id": "125d2e2f-0bab-41f4-b954-5323fbf310ac",
+      "name": "Summary Mail",
+      "webhookId": "a65a1482-17d8-4e85-b7b6-fe01061b2e18",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "oS070JrwF4NiLdks",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query', ``, 'string') }}",
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        540
+      ],
+      "id": "993a5df0-c61f-44de-a79b-3e3c94506f91",
+      "name": "Transcripts",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mAZyXMLfbVGR2J8u",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        992,
+        680
+      ],
+      "id": "8fb393a6-2070-4726-89cd-9c8b4bafa3fb",
+      "name": "Azure OpenAI Chat Model2",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "JYm61qxGDVBjOtEa",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "yashjaintp@gmail.com",
+          "mode": "id"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1112,
+        680
+      ],
+      "id": "7b746f82-5048-465b-b770-636c4491e3ef",
+      "name": "Yashtp",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "yeKGNN5PphwHtqBb",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar', ``, 'string') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        680
+      ],
+      "id": "e2fab461-fd1e-49f8-bc3b-b2629f1319ab",
+      "name": "Yash01122",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "WIR7LVte2sq2a5kb",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=create task events on google caledar for targeted credentials according to following prompt: {{ $json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        460
+      ],
+      "id": "63cff79e-9ede-48c9-9d62-5451b434b9ec",
+      "name": "Event Manager",
+      "retryOnFail": true,
+      "waitBetweenTries": 3500
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarizer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Task Maker",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Fetcher",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task Maker": {
+      "main": [
+        [
+          {
+            "node": "Event Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Task Maker",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Summary Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetcher": {
+      "main": [
+        []
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcripts": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fetcher",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Event Manager",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yashtp": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Manager",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yash01122": {
+      "ai_tool": [
+        [
+          {
+            "node": "Event Manager",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "36d50606-d9eb-4456-b1d7-ee1002418426",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ed3dbf5964c704326a2f18034272b2792e40d92f9c36f2e1ad3245957082527d"
+  },
+  "id": "OVzll0dnXFRQLZqv",
+  "tags": []
+}
